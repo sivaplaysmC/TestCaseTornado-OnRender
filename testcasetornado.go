@@ -75,7 +75,7 @@ func main() {
 	if len(port) == 0 {
 		port = "10000"
 	}
-	endPoint, err := net.Listen("tcp", "localhost:" + port)
+	endPoint, err := net.Listen("tcp", "0.0.0.0:" + port)
 	// fmt.Println(endPoint.Addr().String())
 	fatalErr(err)
 	server := http.Server{
