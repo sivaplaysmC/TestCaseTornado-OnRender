@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -9,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 )
 
 var goTunnelLogger = log.New(os.Stdout, "[GoTunnel] ", log.Ltime|log.Ldate)
@@ -32,6 +32,7 @@ func main() {
 		msgLogger.Printf("Got a %v request from %v\n", r.Method, count)
 		count++
 	})
+
 
 	handler.HandleFunc("/api/post", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
@@ -62,12 +63,23 @@ func main() {
 		}
 	})
 
+
+	wg := sync.WaitGroup{} ;
+	wg.Add(1)
+
+	handler.HandleFunc("/exit", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprint(w, "Byee")
+		wg.Done()
+	})
+
 	endPoint, err := net.Listen("tcp", "localhost:8080")
 	fatalErr(err)
 	server := http.Server{
 		Handler: handler,
 	}
-	server.Serve(endPoint)
+	go server.Serve(endPoint)
+	wg.Wait()
+
 	// go server.Serve(endPoint)
 
 	// resp, err := http.Get("http://localtunnel.me/" + subdomain)
@@ -99,6 +111,10 @@ func main() {
 	//
 	// fun()
 
+}
+
+func abort() {
+	panic("unimplemented")
 }
 
 func checkErr(error error) {
