@@ -33,7 +33,6 @@ func main() {
 		count++
 	})
 
-
 	handler.HandleFunc("/api/post", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			var output strings.Builder
@@ -63,8 +62,7 @@ func main() {
 		}
 	})
 
-
-	wg := sync.WaitGroup{} ;
+	wg := sync.WaitGroup{}
 	wg.Add(1)
 
 	handler.HandleFunc("/exit", func(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +70,13 @@ func main() {
 		wg.Done()
 	})
 
-	endPoint, err := net.Listen("tcp", "localhost:8080")
+	port := os.Getenv("PORT")
+	// fmt.Printf("Port Is : %v\n", port)
+	if len(port) == 0 {
+		port = "10000"
+	}
+	endPoint, err := net.Listen("tcp", "localhost:" + port)
+	// fmt.Println(endPoint.Addr().String())
 	fatalErr(err)
 	server := http.Server{
 		Handler: handler,
